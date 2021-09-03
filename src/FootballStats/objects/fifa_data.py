@@ -3,7 +3,7 @@ FIFA_BASE_URL = "https://www.fifaindex.com"
 
 class PlayerVersionStats():
 
-    def __init__(self, player, year, stats):
+    def __init__(self, player, fifa_year, fifa_version, stats):
 
         self.player = player
         self.year = year
