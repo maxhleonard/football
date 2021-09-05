@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="football-statistics",
-    version="0.0.6",
+    version="0.0.7",
     author="Max Leonard",
     author_email="maxhleonard@gmail.com",
     description="Package for centralized football statistics",
@@ -21,7 +21,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     package_dir={"": "src","FootballStats":"src/FootballStats"},
-    packages=["FootballStats","FootballStats.odds","FootballStats.scraping","FootballStats.objects"],
+    packages=["FootballStats","FootballStats.odds","FootballStats.scraping","FootballStats.objects","FootballStats.functions"],
     package_data={"FootballStats":["data/*"]},
     python_requires=">=3.6",
     install_requires=[

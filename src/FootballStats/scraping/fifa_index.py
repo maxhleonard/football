@@ -1,4 +1,5 @@
-from .common import *
+from FootballStats.scraping.common import *
+from FootballStats.objects.common import get_data_file
 import datetime
 
 FIFA_BASE_URL = "https://www.fifaindex.com"
@@ -34,6 +35,35 @@ def parse_date(text):
     else:
         date = datetime.datetime.strptime(text, "%B %d, %Y")
     return date
+
+def get_fifa_version(fifa_year, target_date):
+
+    fifa_versions = get_data_file("fifa_versions.json")
+    if target_date in fifa_versions[fifa_year].keys():
+        return fifa_versions[fifa_year][target_date]
+
+    dates = [datetime.datetime.strptime(x, "%Y-%m-%d") for x in fifa_versions[fifa_year].keys()]
+    if target_date == None:
+        dates.sort()
+        return fifa_versions[fifa_year][dates[-1].strftime("%Y-%m-%d")]
+    dates = [(x, abs(target_date - x)) for x in dates]
+    dates.sort(key=lambda x: x[1])
+    return fifa_versions[fifa_year][dates[0][0].strftime("%Y-%m-%d")]
+
+def get_fifa_url(fifa_id, fifa_name, fifa_year, fifa_version):
+
+        if fifa_year == None or fifa_version == None:
+            return FIFA_BASE_URL + "/player/{id}/{name}/".format(id=fifa_id, name=fifa_name.replace(" ", "-").lower())
+        else:
+            return FIFA_BASE_URL + "/player/{id}/{name}/{year}_{version}".format(id=fifa_id, name=fifa_name.replace(" ", "-").lower(), year=fifa_year.replace(" ", "").lower(), version=fifa_version)
+
+
+def format_fifa_year(year):
+
+    parts = year.split()
+    if len(parts[1]) == 1:
+        parts[1] = "0" + parts[1]
+    return " ".join(parts)
 
 def get_version_players(url):
 
@@ -179,9 +209,11 @@ def parse_stats_card(card):
 
     stats = {}
     stat_category = card.find(class_="card-header").text.strip()
+    stat_category = stat_category.lower().replace(" ", "_")
     for stat in card.find(class_="card-body").find_all("p"):
         stat_num = stat.find("span").text
         stat_name = stat.text.replace(stat_num, "").strip()
+        stat_name = stat_name.lower().replace(" ", "_")
         stats[stat_name] = int(stat_num)
     return stat_category, stats
 
