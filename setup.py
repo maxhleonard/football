@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="football-statistics",
-    version="0.0.4",
+    version="0.0.6",
     author="Max Leonard",
     author_email="maxhleonard@gmail.com",
     description="Package for centralized football statistics",

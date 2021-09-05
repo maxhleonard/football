@@ -27,7 +27,7 @@ def get_data_file(filename):
     with open(file_path) as f:
         data = json.load(f)
         f.close()
-    return f
+    return data
 
 def get_fifa_version(fifa_year, target_date):
 
