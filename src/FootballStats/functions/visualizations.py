@@ -21,7 +21,7 @@ def fifa_stat_progression(stats, category, attribute):
     plt.plot(X, y)
     plt.title(stats[0].stats_meta.fifa_name + " - " + attribute.replace("_", " "))
     plt.xlabel("FIFA Version Date")
-    plt.xlabel("FIFA Attribute Score")
+    plt.ylabel("FIFA Attribute Score")
     plt.show()
 
 '''

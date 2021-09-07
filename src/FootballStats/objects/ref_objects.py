@@ -39,7 +39,7 @@ class Footballer():
             self.fifa_name = name
         except:
             first_name = name.split()[0]
-            last_name = name.split()[1:]
+            last_name = " ".join(name.split()[1:])
             if first_name in fifa_ids.keys():
                 player_ids = fifa_ids[first_name]
                 self.fifa_id = choose_fifa_id(player_ids, first_name)
@@ -48,6 +48,8 @@ class Footballer():
                 player_ids = fifa_ids[last_name]
                 self.fifa_id = choose_fifa_id(player_ids, last_name)
                 self.fifa_name = last_name
+            else:
+                raise Exception()
         
         #match up with FBREF ID
         if fbref_data_path == None:
