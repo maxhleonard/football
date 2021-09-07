@@ -97,9 +97,7 @@ class Footballer():
         if fifa_version == None:
             fifa_version = fifa_index.get_fifa_version(fifa_year, target_date)
         url = fifa_index.get_fifa_url(self.fifa_id, self.fifa_name, fifa_year, fifa_version)
-        print(url)
         stats = fifa_index.get_player_stats(url)
-        print(stats)
         fifa_meta = FifaMeta(self.fifa_id, self.fifa_name, fifa_year, fifa_version)
         return PlayerVersionStats(fifa_meta, stats)
 

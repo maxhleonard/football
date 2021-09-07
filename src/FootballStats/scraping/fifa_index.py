@@ -72,10 +72,8 @@ def get_version_players(url):
     version_soup = get_soup(url)
     page_navs = get_players_nav(version_soup)
     last_page_url = url + page_navs[-1].find("a")["href"]
-    print("LAST", last_page_url)
     while True:
         page_url = url + "?page=" + str(page)
-        print(page_url)
         page_soup = get_soup(page_url)
         players += get_page_players(page_soup)
         if page_url == last_page_url:
@@ -99,6 +97,15 @@ def get_all_fifa_versions():
             version_link = FIFA_BASE_URL + version["href"]
             versions[fifa_year].append({"date":version_date.strftime("%Y-%m-%d"), "link":version_link})
     return versions
+
+def parse_span_data_row(row):
+
+    all_text = row.text
+    spans = row.find_all("span")
+    value_text = " ".join(x.text.strip() for x in row.find_all(recursive=False))
+    data_name = row.text.replace(value_text, "").strip()
+    data_value = spans[-1].text.strip()
+    return data_name, data_value
 
 def parse_bio_card(card):
 
@@ -133,24 +140,24 @@ def parse_bio_card(card):
             elif "Weight" in line.text:
                 weight = int(line.find(class_="data-units-metric").text.replace(" kg", ""))
             elif "Preferred Foot" in line.text:
-                preferred_foot = line.find("span").text
+                preferred_foot = parse_span_data_row(line)[1]
             elif "Birth Date" in line.text:
-                birth_date = parse_date(line.find("span").text).strftime("%Y-%m-%d")
+                birth_date = parse_date(parse_span_data_row(line)[1]).strftime("%Y-%m-%d")
             elif "Age" in line.text:
-                age = int(line.find("span").text)
+                age = int(parse_span_data_row(line)[1])
             elif "Preferred Positions" in line.text:
                 for pos in line.find_all("a"):
                     preferred_positions.append(pos["title"])
             elif "Player Work Rate" in line.text:
-                player_work_rate = line.find("span").text
+                player_work_rate = parse_span_data_row(line)[1]
             elif "Weak Foot" in line.text:
                 weak_foot = len(line.find_all("i", class_="fas"))
             elif "Skill Moves" in line.text:
                 skill_moves = len(line.find_all("i", class_="fas"))
             elif "Value" in line.text and "data-currency-euro" in line["class"]:
-                value = float(line.find("span").text.replace("€", "").replace(".",""))
+                value = float(parse_span_data_row(line)[1].replace("€", "").replace(".",""))
             elif "Wage" in line.text and "data-currency-euro" in line["class"]:
-                wage = float(line.find("span").text.replace("€", "").replace(".", ""))
+                wage = float(parse_span_data_row(line)[1].replace("€", "").replace(".", ""))
 
     return {"name":name, "overall_rating":overall_rating, "potential_rating":potential_rating, "height":height, "weight":weight, "preferred_foot":preferred_foot, "birth_date":birth_date, "age":age, "preferred_positions":preferred_positions, "player_work_rate":player_work_rate, "weak_foot":weak_foot, "skill_moves":skill_moves, "value":value, "wage":wage}
 
@@ -202,7 +209,7 @@ def parse_attributes_card(card):
     attributes = []
     if card != None:
         for attribute in card.find(class_="card-body").find_all("p"):
-            attributes.append(attribute.text.replace("(CPU AI Only)", ""))
+            attributes.append(attribute.text.replace("(CPU AI Only)", "").strip())
     return attributes
 
 def parse_stats_card(card):
@@ -211,9 +218,8 @@ def parse_stats_card(card):
     stat_category = card.find(class_="card-header").text.strip()
     stat_category = stat_category.lower().replace(" ", "_")
     for stat in card.find(class_="card-body").find_all("p"):
-        stat_num = stat.find("span").text
-        stat_name = stat.text.replace(stat_num, "").strip()
-        stat_name = stat_name.lower().replace(" ", "_")
+        stat_name, stat_num = parse_span_data_row(stat)
+        stat_name = stat_name.lower().replace(" ", "_").replace(".", "")
         stats[stat_name] = int(stat_num)
     return stat_category, stats
 
