@@ -1,5 +1,5 @@
 from FootballStats.objects.fifa_data import *
-from FootballStats.scraping import fifa_index
+from FootballStats.scraping import fifa_index, fbref
 from FootballStats.objects.constants import *
 from FootballStats.scraping.common import get_soup
 from FootballStats.objects.common import *
@@ -15,6 +15,11 @@ def choose_fifa_id(ids, name):
         stats = fifa_index.get_player_stats(url)
 
 def choose_fbref_id(ids, name):
+
+    if len(ids) == 1:
+        return ids[0]
+
+def choose_fbref_team_id(ids, name):
 
     if len(ids) == 1:
         return ids[0]
@@ -107,3 +112,34 @@ class Footballer():
 
         versions = self.get_all_fifa_versions()
         return [self.get_fifa_stats(ver[0], fifa_version=ver[1]) for ver in versions]
+
+
+    def get_game(self, opponent=None, home=None, game_date=None, season=None):
+
+        try:
+            opponent_obj = Team(opponent)
+            opp = {"id":opponent_obj.fbref_id, "name":opponent_obj.fbref_name}
+        except:
+            opp = {"id":None, "name":None}
+
+        stats = fbref.get_player_game_stats({"id":self.fbref_id, "name":self.fbref_name}, opponent=opp, home=home, date=game_date, season=season)
+        return stats
+
+class Team():
+
+    def __init__(self, name, fbref_data_path=None):
+
+        self.name = name
+        
+        if fbref_data_path == None:
+            fbref_ids = get_data_file("fbref_team_ids.json")
+        else:
+            with open(fbref_data_path) as f:
+                fbref_ids = json.load(f)
+                f.close()
+        try:
+            team_ids = fbref_ids[name]
+            self.fbref_id = choose_fbref_team_id(team_ids, name)
+            self.fbref_name = name
+        except:
+            raise Exception
